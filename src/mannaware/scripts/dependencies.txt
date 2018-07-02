@@ -1,0 +1,3 @@
+AWSIoTPythonSDK
+git+https://github.com/dpallot/simple-websocket-server.git
+websocket-client

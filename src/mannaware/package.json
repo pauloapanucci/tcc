@@ -1,0 +1,24 @@
+{
+  "name": "polymer-starter-kit",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.0",
+    "eslint-plugin-html": "^2.0.0"
+  },
+  "scripts": {
+    "serve": "polymer serve --port 4000 & browser-sync start --port 4001 --ui-port 4002 --proxy localhost:4000 --files 'src/**/*.html, src/**/*.js, images/*' --no-open",
+    "watch": "browser-sync start --proxy localhost:8081 --files \"src/**/*.*, index.html, *.js\"",
+    "lint": "npm run lint:javascript && polymer lint",
+    "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
+    "test": "polymer test",
+    "test:integration": "polymer build # test that psk builds without error with the CLI"
+  },
+  "dependencies": {
+    "aws-iot-device-sdk": "^2.2.1",
+    "bower": "^1.8.4",
+    "jquery": "^3.3.1",
+    "polymer-cli": "^1.7.7",
+    "ws": "^5.1.1"
+  }
+}

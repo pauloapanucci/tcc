@@ -1,0 +1,8 @@
+Raspberry PI           RFM9x Module
+   MISO  (21)  <---->  MISO
+   MOSI  (19)  <---->  MOSI
+   SCK   (23)  <---->  SCK
+   CE0   (24)  <---->  NSS
+   GPIO22(15)  <---->  Reset (JP5)
+   GPIO25(22)  <---->  DIO0 
+   GPIO24(18)  <---->  DIO5 

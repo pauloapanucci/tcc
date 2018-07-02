@@ -1,0 +1,7 @@
+https://docs.aws.amazon.com/iot/latest/developerguide/iot-embedded-c-sdk.html
+
+http://www.airspayce.com/mikem/arduino/RadioHead/index.html
+
+https://github.com/gh0st42/ttgo-examples
+
+sudo nmap -sP 192.168.100.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'

@@ -1,0 +1,297 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/good-map/good-map.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="./../bower_components/web-socket/web-socket.html">
+
+
+<dom-module id="my-rpi-gateway-view">
+  <template>
+    <style include="shared-styles">
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      :host {
+        display: flex;
+
+        padding: 50px;
+      }
+
+      paper-card {
+        max-width: 450px;
+      }
+
+      card-content{
+        text-align: center;
+      }
+
+      .node-header {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        @apply --paper-font-headline;
+      }
+
+      .cafe-light {
+        color: var(--paper-grey-600);
+      }
+
+      .cafe-location {
+        float: right;
+        font-size: 15px;
+        vertical-align: middle;
+      }
+
+      .cafe-reserve {
+        color: var(--google-blue-500);
+      }
+
+      iron-icon.star {
+        --iron-icon-width: 16px;
+        --iron-icon-height: 16px;
+        color: var(--paper-amber-500);
+      }
+
+      iron-icon.star:last-of-type {
+        color: var(--paper-grey-500);
+      }
+
+      paper-card.img-custom {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        padding: 10px;
+        --paper-card-header-image: { 
+          width: 100px;
+          height: 100px;
+        }
+        
+      }
+      @media all and (min-width: 700px) {
+        :host[show] {
+          @apply(--layout-justified);
+        }
+        paper-card {
+          width: calc(50% - 100px);
+        }
+        paper-card + paper-card {
+          margin-left: 60px;
+        }
+      }
+
+      good-map {
+        display: block;
+        height: 400px;
+      }
+    </style>
+
+    <paper-card id="data-element" class="img-custom" image="../images/watertemp.png">
+      <div class="card-content">
+        <div class="node-header">Nó de temperatura da água</div>
+        <p >Temperatura: [[temp]]</p>
+        <p >Enviado por: dispositivo de borda #[[fromT]]</p>
+        <!-- <p >RSSI: [[rssiT]]</p> -->
+      </div>
+    </paper-card>
+
+    <paper-card id="data-element" class="img-custom" image="../images/gpsicon.png">
+      
+      <div class="card-content">
+        <div class="node-header">Nó de geolocalização</div>
+        <p >Latitude: {{__getLat()}}</p>
+        <p >Longitude: [[__getLong()]]</p>
+        <p >Enviado por: dispositivo de borda #[[fromL]]</p>
+        <!-- <p >RSSI: [[rssiL]]</p> -->
+      </div>
+    </paper-card>
+
+    <good-map api-key="AIzaSyAsav5lnF2sxIUR6sf_jO1Y-Pqd5BQfIs4"
+        latitude={{__getLat()}}
+        longitude={{__getLong()}} zoom="2"
+        map-options='{"mapTypeId": "satellite"}'>
+      </good-map>
+
+    <web-socket 
+        id="ws"        
+        url="{{url}}"
+        protocols="{{protocols}}"
+        state="{{state}}"
+        last-request="{{request}}"
+        last-response="{{response}}"
+        last-error="{{error}}"
+        on-error="__handleError"
+        on-message="__handleMessage"
+        on-open="__handleOpen"
+        on-close="__handleClose">
+    </web-socket>
+  </template>
+
+  <script>
+    class MyRpiGatewayView extends Polymer.Element {
+      static get is() { 
+        return 'my-rpi-gateway-view'; 
+      }
+
+      static get properties () {
+        return {
+          url: {
+            type: String,
+            value: 'ws://127.0.0.1:5000',
+            observer: '__handleUrlChanges',
+            notify: true
+          },
+          state: {
+            type: Number,
+            observer: '__handleWSStateChanges',
+            notify: true
+          },
+          response: {
+            type: Object,
+            observer: '__handleResponse'
+          },
+          error: {
+            type: Object,
+            observer: '__handleError'
+          },
+          temp: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          fromT: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          toT: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          rssiT: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          lat: {
+            type: String,
+            value: '-23.417500',
+            notify: true
+          },
+          long: {
+            type: String,
+            value: '-51.925751',
+            notify: true
+          },
+          fromL: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          toL: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+          rssiL: {
+            type: String,
+            value: '0',
+            notify: true
+          },
+        }
+      }
+      ready () {
+        super.ready()
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          this.$['ws'].open()
+        })
+        
+      }
+
+      blobToString(b) {
+        var u, x;
+        u = URL.createObjectURL(b);
+        x = new XMLHttpRequest();
+        x.open('GET', u, false); // although sync, you're not fetching over internet
+        x.send();
+        URL.revokeObjectURL(u);
+        return x.responseText;
+      }
+
+      __handleUrlChanges(event){
+        // console.log("WebSocket URL changed ", event)
+      }
+
+      __handleWSStateChanges(event){
+        // console.log("WebSocket WSSState changed ", event)
+      }
+
+      __handleResponse(){
+        // console.log()
+        // console.log(this.response + "Type: "+ typeof(this.response))
+        var str = this.blobToString(this.response)
+        // console.log(str)
+        var content = str.replace(/u'/g, "'")
+        content = content.replace(/'/ig,'"')
+        // console.log(content)
+        var json = JSON.parse(content)
+        // console.log(json)
+        if(json.length != 0){
+          this.temp = json.temperature
+          this.fromT = json.fromTemp
+          this.toT  = json.to
+          this.rssiT = json.rssiTemp
+          var split = json.latLong.split("|")
+          this.lat = split[0]
+          this.long = split[1]
+          this.fromL  = json.fromLatLong
+          this.toL = json.to
+          this.rssiL = json.rssiLatLong
+        }
+        this.$['ws'].send('appshadow')
+      }
+
+      __handleError(event){
+        console.log("WebSocket URL ERROR ", error)
+      }
+
+      __handleOpen(){
+        console.log("connection opened on " + this.url)
+        this.$['ws'].send('appshadow')
+      }
+
+      __handleClose(){
+        console.log("WebSocket Closed... ReOpening")
+        this.$['ws'].open()
+      }
+
+      __handleMessage(event){
+        console.log("message send")
+      }
+      __getLat(){
+        return parseFloat(this.lat)
+      }
+      __getLong(){
+        return parseFloat(this.long)
+      }
+  }
+    window.customElements.define(MyRpiGatewayView.is, MyRpiGatewayView);
+  </script>
+</dom-module>

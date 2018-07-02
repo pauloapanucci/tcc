@@ -1,0 +1,99 @@
+<link rel="import" href="./../bower_components/web-socket/web-socket.html">
+
+<dom-module id="web-socket">
+  <template>
+    <web-socket 
+        id="ws"        
+        url="{{url}}"
+        protocols="{{protocols}}"
+        state="{{state}}"
+        last-request="{{request}}"
+        last-response="{{response}}"
+        last-error="{{error}}"
+        on-error="__handleError"
+        on-message="__handleMessage"
+        on-open="__handleOpen"
+        on-close="__handleClose">
+    </web-socket>
+  </template>
+  <script>
+    class BarcodeScanner extends Polymer.Element {
+      static get is () {
+        return 'web-socket'
+      }
+
+      static get properties () {
+        return {
+            url: {
+            type: String,
+            value: 'ws://127.0.0.1:5000',
+            observer: '__handleUrlChanges',
+            notify: true
+          },
+          state: {
+            type: Number,
+            observer: '__handleWSStateChanges',
+            notify: true
+          },
+          response: {
+            type: Object,
+            observer: '__handleResponse'
+          },
+          error: {
+            type: Object,
+            observer: '__handleError'
+          },
+        }
+      }
+      ready () {
+        super.ready()
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          this.$['ws'].open()
+        })
+        
+      }
+
+      blobToString(b) {
+        var u, x;
+        u = URL.createObjectURL(b);
+        x = new XMLHttpRequest();
+        x.open('GET', u, false); // although sync, you're not fetching over internet
+        x.send();
+        URL.revokeObjectURL(u);
+        return x.responseText;
+      }
+
+      __handleUrlChanges(event){
+        // console.log("WebSocket URL changed ", event)
+      }
+
+      __handleWSStateChanges(event){
+        // console.log("WebSocket WSSState changed ", event)
+      }
+
+      __handleResponse(){
+        console.log(this.response)
+        this.$['ws'].send('shadowapp')
+      }
+
+      __handleError(event){
+        console.log("WebSocket URL ERROR ", error)
+      }
+
+      __handleOpen(){
+        this.$['ws'].send('appbarcode')
+      }
+
+      __handleClose(){
+        console.log("WebSocket Closed... ReOpening")
+        this.$['ws'].open()
+      }
+
+      __handleMessage(event){
+        // console.log(event)
+      }
+
+    }
+    window.customElements.define(WebSocket.is, WebSocket)
+  </script>
+</dom-module>

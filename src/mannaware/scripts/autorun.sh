@@ -1,0 +1,1 @@
+python shadow.py -e "a2g4kcwiyy0rle.iot.us-west-2.amazonaws.com" -r "../certs/VeriSign-Class 3-Public-Primary-Certification-Authority-G5.pem" -c "../certs/fd5f1c490d-certificate.pem.crt" -k "../certs/fd5f1c490d-private.pem.key" -n "RPi-Gateway" -id "AKIAIEBNJ2XLO56KZCIA"
